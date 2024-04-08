@@ -17,7 +17,8 @@
 ##
 
 ## Load full raw data file
-Matched	= read.csv(file = paste(Path, "Data\\Matches.csv",sep=""), head=TRUE) 
+Matched	= read.csv(file = file.path(Path, "Data", "Matches.csv"), head =
+                     TRUE)
 load(paste(Path,"Data\\UNVotes.RData",sep=""))
 
 	
@@ -106,8 +107,11 @@ UN2$CSession 	= round(UN2$ccode + UN2$session/100, 2)
 AllData 		= data.frame(UN2$CSession, UN2$ccode, UN2$session, UN2$rcid, UN2$rcidL, UN2$vote)	#, UN2$voetenshortcode
 AllData 		= AllData[order(UN2$rcidL, UN2$ccode, UN2$session), ]			## Sort data by (linked) roll call number (rcidL)
 
-write(t(AllData), file = paste(Path, "Output\\AllData_", FileSuffix, ".txt",sep=""), ncol=length(AllData[1,]))
-	CSession	= AllData[,1];	Country	= AllData[,2]
+
+write(t(AllData),
+      file = file.path(Path, "Output", str_c("AllData_", FileSuffix, ".txt")),
+      ncolumns = length(AllData[1, ]))
+CSession	= AllData[,1];	Country	= AllData[,2]
 	Session	= AllData[,3];	VoteID	= AllData[,5]
 	yObs		= AllData[,6]		
 
@@ -125,9 +129,18 @@ write(t(AllData), file = paste(Path, "Output\\AllData_", FileSuffix, ".txt",sep=
 	VotePct 		= VoteTally[, 2:4]/ VoteTally[,5]
 	MatchedDum 		= VoteList %in% Matched$rcid1
 	VoteTally		= cbind(VoteTally, MatchedDum)
-	write(t(VoteTally), 	file = paste(Path, "Output\\VoteTally_", FileSuffix, ".txt",sep=""), 	ncol=length(VoteTally[1,]))
+write(
+  t(VoteTally),
+  file = file.path(Path, "Output",str_c("VoteTally_", FileSuffix, ".txt")),
+  ncolumns  = length(VoteTally[1, ])
+)
 
-	write(VoteList, 		file = paste(Path, "Output\\VoteList_", FileSuffix, ".txt",sep=""), ncol = 1 	)
+write(
+  VoteList,
+  file = file.path(Path, "Output",str_c("VoteList_", FileSuffix, ".txt")),
+  ncolumns  = 1
+)
+
 ## CHECK dim(VoteTally)
 ## CHECK VoteTally[1:4,]
 
@@ -137,8 +150,16 @@ write(t(AllData), file = paste(Path, "Output\\AllData_", FileSuffix, ".txt",sep=
 ##
 IndN 		= as.vector(table(CSession))	## Number of votes by each country (if 0, need to delete)
 VoteN		= as.vector(table(VoteID))	  ## Number of countries for each vote 
-write(t(IndN),  file = paste(Path, "Output\\IndN_",  FileSuffix, ".txt",sep=""), ncol=1)
-write(t(VoteN), file = paste(Path, "Output\\VoteN_", FileSuffix, ".txt",sep=""), ncol=1)
+write(
+  t(IndN),
+  file = file.path(Path, "Output",str_c("IndN_",  FileSuffix, ".txt")),
+  ncolumns  = 1
+)
+write(
+  t(VoteN),
+  file = file.path(Path, "Output",str_c("VoteN_",  FileSuffix, ".txt")),
+  ncolumns  = 1
+)
 	## CHECK: TEMP = cbind(IndN, CountryList, SessionList) TEMP[CountryList > 254 & CountryList <261, ]
 
 ##
@@ -153,7 +174,11 @@ for (tt in 1:TTlink)	{			## This is possible b/c sorted AllData by (linked) roll
 	StartVote[tt] 	= min(ObsID[VoteID == VoteList[tt]])		
 	EndVote[tt]		= max(ObsID[VoteID == VoteList[tt]])		}
 VoteStartEnd 		= cbind(StartVote, EndVote)
-write(t(VoteStartEnd), file = paste(Path, "Output\\VoteStartEnd_", FileSuffix, ".txt",sep=""), ncol=length(VoteStartEnd[1,]))
+write(
+  t(VoteStartEnd),
+  file = file.path(Path, "Output", str_c("VoteStartEnd_", FileSuffix, ".txt")),
+  ncolumns  = length(VoteStartEnd[1, ])
+)
 
 ## DIAGNOSTIC: Indicates that the number of votes per roll call is same as number implied by starting and ending observations of vote (true if properly sorted)
 	mean(EndVote - StartVote + 1 == VoteN)		# Should equal 1
@@ -167,7 +192,11 @@ NN			= length(CountrySessionList)
 IObsMat 		= matrix(NA, NN, max(IndN))				# Matrix w/ columns equal to maximum number of votes for individual country
 for (ii in 1:NN) IObsMat[ii, 1:IndN[ii]] = ObsID[CSession == CountrySessionList[ii]]
 
-write(t(IObsMat), file = paste(Path, "Output\\IObsMat_", FileSuffix, ".txt",sep=""), ncol=length(IObsMat[1,]))
+write(
+  t(IObsMat),
+  file = file.path(Path, "Output", str_c("IObsMat_", FileSuffix, ".txt")),
+  ncolumns =  length(IObsMat[1, ])
+)
 
 ##
 ## Create vectors listing countries and sessions for country-year combos
@@ -175,9 +204,16 @@ write(t(IObsMat), file = paste(Path, "Output\\IObsMat_", FileSuffix, ".txt",sep=
 
 CountryList 	= floor(CountrySessionList)
 SessionList 	= round(100*(CountrySessionList - floor(CountrySessionList)), 2)
-write(t(CountryList), file = paste(Path, "Output\\CountryList_", FileSuffix, ".txt",sep=""), ncol=1)
-write(t(SessionList), file = paste(Path, "Output\\SessionList_", FileSuffix, ".txt",sep=""), ncol=1)
-
+write(
+  t(CountryList),
+  file = file.path(Path, "Output", str_c("CountryList_", FileSuffix, ".txt")),
+  ncolumns = 1
+)
+write(
+  t(SessionList),
+  file = file.path(Path, "Output", str_c("SessionList_", FileSuffix, ".txt")),
+                   ncolumns = 1
+)
 ## DIAGNOSTIC FOR "ALL"- should be all be true
 	#Country[IObsMat [136, 1:VoteN[136]]] == floor(CountrySessionList[136])
 	#Session[IObsMat [136, 1:VoteN[136]]] == SessionList[136]
@@ -208,8 +244,16 @@ for (nn in 1:length(IndN)) {
 		SmoothVector[nn] = IndN[nn] / 
 					(IndN[nn] + length(UN2$ccode[UN2$ccode==CountryList[nn] & UN2$session== max(UN2$session[UN2$ccode==CountryList[nn] & UN2$session < SessionList[nn]])]	) )}
 
-write(t(SmoothVector), 	file = paste(Path, "Output\\SmoothVector_", FileSuffix, ".txt",sep=""), ncol=1)
-write(t(GapYear), 	file = paste(Path, "Output\\GapYear_", FileSuffix, ".txt",sep=""), ncol=1)
+write(
+  t(SmoothVector),
+  file = file.path(Path, "Output", str_c("SmoothVector_", FileSuffix, ".txt")),
+  ncolumns = 1
+)
+write(
+  t(GapYear),
+  file = file.path(Path, "Output", str_c("GapYear_", FileSuffix, ".txt")),
+  ncolumns = 1
+)
 
 
 ##
@@ -227,7 +271,11 @@ write(t(GapYear), 	file = paste(Path, "Output\\GapYear_", FileSuffix, ".txt",sep
 	for (tt in 1:TTlink) if (length(AllData[AllData[,2]==365 & AllData[,5]==VoteList[tt],6]) > 0) RussiaVote[tt] 	= AllData[AllData[,2]==365 & AllData[,5]==VoteList[tt],6]
 	USUKRussia		= cbind(USVote, UKVote, RussiaVote)			## cor(USUKRussia, , use = "pairwise.complete.obs")
 
-	write(t(USUKRussia), 	file = paste(Path, "Output\\USUKRussia_", FileSuffix, ".txt",sep=""), 	ncol=length(USUKRussia[1,]))
+write(
+  t(USUKRussia),
+  file = file.path(Path, "Output", str_c("USUKRussia_", FileSuffix, ".txt")),
+  ncolumns = length(USUKRussia[1, ])
+)
 
 	
 	
@@ -251,14 +299,22 @@ VoteCode			= rep(0, TTlink)
 		if(VoteTally[vvv , 2]==0 & VoteTally[vvv , 3]> 0 & VoteTally[vvv , 4]>  0) VoteCode[vvv] = 3
 		if(VoteTally[vvv , 2]> 0 & VoteTally[vvv , 3]==0 & VoteTally[vvv , 4]>  0) VoteCode[vvv] = 4
 		} 	# END for (vvv in 1:TTlink) {			## CHECK: cbind(VoteCode, VoteTally)
-	write(t(VoteCode), 	file = paste(Path, "Output\\VoteCode_",  FileSuffix, ".txt",sep=""), 	ncol=1)
-
+write(
+  t(VoteCode),
+  file = file.path(Path, "Output", str_c("VoteCode_",  FileSuffix, ".txt")),
+  ncolumns = 1
+)
 
 ## gStart is matrix of starting values for vote cutpoints
 	## USE PREVIOUS VERSION FOR NOW
 	## use simple perentage on -1 to 1 scale.  If 80% of observations =1, then 80 of that area is less than 0.6 (etc)
 	gStart 	= cbind(rep(-Inf, TTlink), -1 + 2* VotePct[,1], -1 + 2*(VotePct[,1] + VotePct[,2]), rep(Inf, TTlink))  
-	write(t(gStart), 	file = paste(Path, "Output\\gStart_", FileSuffix, ".txt",sep=""), 	ncol=length(gStart[1,]))	## CHECK: cbind(gStart, VoteCode, VoteTally)
+write(
+  t(gStart),
+  file = file.path(Path, "Output", str_c("gStart_", FileSuffix, ".txt")),
+  ncolumns = length(gStart[1, ])
+)	
+## CHECK: cbind(gStart, VoteCode, VoteTally)
 
 NewGammaStart 	=  0
 if(NewGammaStart 	== 1){
@@ -331,8 +387,11 @@ for(tt in 1:TTlink) {	## Ensure gamma1 < gamma2 by flipping as needed (around 20
 		xCANDGamma2[tt] = xCANDGamma1[tt]
 		xCANDGamma1[tt] = tempHold	}	}	# END for(tt in 1:TT)
 	gStart 	= cbind(rep(-Inf, TTlink), xCANDGamma1, xCANDGamma2, rep(Inf, TTlink))  
-	write(t(gStart), 	file = paste(Path, "Output\\gStart_", FileSuffix, ".txt",sep=""), 	ncol=length(gStart[1,]))	## CHECK: cbind(gStart, VoteCode, VoteTally)
-
+  write(
+    t(gStart),
+    file = file.path(Path, "Output",str_c("gStart_", FileSuffix, ".txt")),
+    ncolumns = length(gStart[1, ])
+  )	## CHECK: cbind(gStart, VoteCode, VoteTally)
 } ## END if(NewGammaStart == 1){
 
 ##
@@ -398,8 +457,12 @@ if(CreateAgreeMatrix ==1) {
 	}
 
 	AgreeMatrix 			= cbind(1:NN, CSList , PctUSAgree, PctRUSSAgree, PctBrazilAgree, PctChinaAgree,  PctIndiaAgree, PctIsraelAgree, yobCountMatrix)
-	write(t(AgreeMatrix), 	file = paste(Path, "Output\\AgreeMatrix_", FileSuffix, ".txt",sep=""), ncol=length(AgreeMatrix[1,]))
-
+  write(
+    t(AgreeMatrix),
+    file = file.path(Path, "Output",str_c("AgreeMatrix_", FileSuffix, ".txt")),
+    ncolumns = length(AgreeMatrix[1, ])
+  )
+  
 
 	IsraelVote	= rep(NA, TTlink); 
 	for (tt in 1:TTlink) if (length(AllData[AllData[,2]==666 & AllData[,5]==VoteList[tt],6]) > 0) IsraelVote[tt] 	= AllData[AllData[,2]==666  & AllData[,5]==VoteList[tt],6]
@@ -417,6 +480,15 @@ if(CreateAgreeMatrix ==1) {
 	for (tt in 1:TTlink) if (length(AllData[AllData[,2]==750 & AllData[,5]==VoteList[tt],6]) > 0) IndiaVote[tt] 	= AllData[AllData[,2]==750  & AllData[,5]==VoteList[tt],6]
 
 	USUKRussiaBrazilChinaIndiaIsrael		= cbind(USVote, UKVote, RussiaVote, BrazilVote, ChinaVote, IsraelVote, IndiaVote)				## DIAGNOSTIC: VoteSum	= cbind(VoteTally, USVote, UKVote, IsraelVote)
-	write(t(USUKRussiaBrazilChinaIndiaIsrael), 	file = paste(Path, "Output\\USUKRussiaBrazilChinaIndiaIsrael_", FileSuffix, ".txt",sep=""), 	ncol=length(USUKRussiaBrazilChinaIndiaIsrael[1,]))
-
+  write(
+    t(USUKRussiaBrazilChinaIndiaIsrael),
+    file = file.path(
+      Path,
+      "Output",
+      str_c("USUKRussiaBrazilChinaIndiaIsrael_",
+      FileSuffix,
+      ".txt"
+    )),
+    ncolumns = length(USUKRussiaBrazilChinaIndiaIsrael[1, ])
+  )
 } ## END  if(CreateAgreeMatrix ==1)
