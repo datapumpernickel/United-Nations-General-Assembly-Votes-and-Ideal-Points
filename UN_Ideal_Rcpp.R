@@ -73,28 +73,31 @@ require(here)
 #library(pkgbuild)
 #library(rtools)
 #find_rtools()
-	sourceCpp(paste(Path, "RcppFunctions\\PopulateThetaVector.cpp", 	sep="") )
-	sourceCpp(paste(Path, "RcppFunctions\\VarBetaFunction.cpp", 	sep="") )	
-	sourceCpp(paste(Path, "RcppFunctions\\BetaMeanFunction.cpp", 	sep="") )		
+sourceCpp(file.path(Path, "RcppFunctions", "PopulateThetaVector.cpp"))
+sourceCpp(file.path(Path, "RcppFunctions", "VarBetaFunction.cpp"))
+sourceCpp(file.path(Path, "RcppFunctions", "BetaMeanFunction.cpp"))		
 
 ## Load data
-AllData = read.table(file 	= paste(Path, "Output\\AllData_", FileSuffix, ".txt"	, sep="") )
-	CSession	= AllData[,1];	Country	= AllData[,2]
-	Session	= AllData[,3];	VoteID	= AllData[,5]
-	yObs		= AllData[,6];	
-	ObsID 	= 1:length(Country)
-	ObsN		= length(ObsID)
-	RClist 	= sort(unique(VoteID))
-VoteStartEnd 	= read.table(file =	  paste(Path, "Output\\VoteStartEnd_", 	FileSuffix, ".txt", 	sep=""))
-IObsMat		= as.matrix(read.table(file = paste(Path, "Output\\IObsMat_", 	FileSuffix, ".txt", 	sep="")))
-VoteN			= unlist(read.table(file =paste(Path, "Output\\VoteN_", 		FileSuffix, ".txt", 	sep="")))
-IndN			= unlist(read.table(file =paste(Path, "Output\\IndN_", 			FileSuffix, ".txt", 	sep="")))
-CountryList		= unlist(read.table(file =paste(Path, "Output\\CountryList_", 	FileSuffix, ".txt", 	sep="")))
-SessionList		= unlist(read.table(file =paste(Path, "Output\\SessionList_", 	FileSuffix, ".txt", 	sep="")))
-SmoothVector	= unlist(read.table(file =paste(Path, "Output\\SmoothVector_", 	FileSuffix, ".txt", 	sep="")))
-GapYear		= unlist(read.table(file =paste(Path, "Output\\GapYear_", 		FileSuffix, ".txt", 	sep="")))
-VoteCode		= unlist(read.table(file =paste(Path, "Output\\VoteCode_", 		FileSuffix, ".txt", 	sep="")))
-VoteList		= read.table(file =paste(Path, "Output\\VoteList_", 		FileSuffix, ".txt", 	sep=""))
+AllData <- read.table(file.path(Path, "Output", str_c("AllData_", FileSuffix, ".txt")))
+CSession <- AllData[, 1]
+Country <- AllData[, 2]
+Session <- AllData[, 3]
+VoteID <- AllData[, 5]
+yObs <- AllData[, 6]
+ObsID <- 1:length(Country)
+ObsN <- length(ObsID)
+RClist <- sort(unique(VoteID))
+VoteStartEnd <- read.table(file = file.path(Path, "Output", str_c("VoteStartEnd_", FileSuffix, ".txt")))
+IObsMat <- as.matrix(read.table(file = file.path(Path, "Output", str_c("IObsMat_", FileSuffix, ".txt"))))
+VoteN <- unlist(read.table(file = file.path(Path, "Output", str_c("VoteN_", FileSuffix, ".txt"))))
+IndN <- unlist(read.table(file = file.path(Path, "Output", str_c("IndN_", FileSuffix, ".txt"))))
+CountryList <- unlist(read.table(file = file.path(Path, "Output", str_c("CountryList_", FileSuffix, ".txt"))))
+SessionList <- unlist(read.table(file = file.path(Path, "Output", str_c("SessionList_", FileSuffix, ".txt"))))
+SmoothVector <- unlist(read.table(file = file.path(Path, "Output", str_c("SmoothVector_", FileSuffix, ".txt"))))
+GapYear <- unlist(read.table(file = file.path(Path, "Output", str_c("GapYear_", FileSuffix, ".txt"))))
+VoteCode <- unlist(read.table(file = file.path(Path, "Output", str_c("VoteCode_", FileSuffix, ".txt"))))
+VoteList <- read.table(file = file.path(Path, "Output", str_c("VoteList_", FileSuffix, ".txt")))
+
 
 NN 			= length(unique(CSession))
 TT 			= length(unique(VoteID))
@@ -142,12 +145,12 @@ if(Continuation == 0) {
 			}	## END if(DataCode == "Nuclear")
 				
 			
-			gammaMat 		= as.matrix(read.table(file =paste(Path, "Output\\gStart_", FileSuffix, ".txt", 	sep="") ))
+			gammaMat 		= as.matrix(read.table(file =file.path(Path, "Output",str_c("gStart_", FileSuffix, ".txt")) ))
 			Gamma1			= gammaMat[,2]
 			Gamma2			= gammaMat[,3]
 			CANDGamma1			= gammaMat[,2]
 			CANDGamma2			= gammaMat[,3]
-			USUKRussia			= read.table(file =paste(Path, "Output\\USUKRussia_", FileSuffix, ".txt", 	sep="") )
+			USUKRussia			= read.table(file =file.path(Path, "Output",str_c("USUKRussia_", FileSuffix, ".txt")) )
 			Beta[USUKRussia$V1 > USUKRussia$V3] = 1 
 			Beta[USUKRussia$V1 < USUKRussia$V3] = -1
 			# Beta 				= 0 - (apply(USUKRussia[, 1:2], 1, mean, na.rm=T)==1)  + (apply(USUKRussia[, 1:2], 1, mean, na.rm=T)==3)
@@ -169,15 +172,16 @@ if(Continuation == 0) {
 			# ySim = 1: Z lower bound = -INF & upper bd = gamma1; ySim = 2: Z lower bd = gamma1 & upper bd. = gamma3; ySim = 3: Z lower bd = gamma2 & upper bd = INF
 } ## END: if(Continuation == 0)
 
+
 if(Continuation == 1) { 
-	Z		= unlist(read.table(file = paste(Path, "Output\\ZSaveRW_", 	FileSuffix, ".txt", sep="")))
-	Gamma1	= unlist(read.table(file = paste(Path, "Output\\Gamma1RW_", 	FileSuffix, ".txt", sep="")))
-	Gamma2	= unlist(read.table(file = paste(Path, "Output\\Gamma2RW_", 	FileSuffix, ".txt", sep="")))
-	gLo		= unlist(read.table(file = paste(Path, "Output\\gLoSaveRW_", 	FileSuffix, ".txt", sep="")))
-	gHi		= unlist(read.table(file = paste(Path, "Output\\gHiSaveRW_", 	FileSuffix, ".txt", sep="")))
-	ThetaVector	= unlist(read.table(file = paste(Path, "Output\\ThetaVectorSaveRW_", 	FileSuffix, ".txt", sep="")))
-	BetaVector	= unlist(read.table(file = paste(Path, "Output\\BetaVectorSaveRW_", 	FileSuffix, ".txt", sep="")))
-	BurnKPrev	= unlist(read.table(file = paste(Path, "Output\\BurnKRW_", 			FileSuffix, ".txt", sep="")))
+	Z		= unlist(read.table(file =          file.path(Path, "Output",str_c("ZSaveRW_", 	FileSuffix, ".txt"          ))))
+	Gamma1	= unlist(read.table(file =      file.path(Path, "Output",str_c("Gamma1RW_", 	FileSuffix, ".txt"          ))))
+	Gamma2	= unlist(read.table(file =      file.path(Path, "Output",str_c("Gamma2RW_", 	FileSuffix, ".txt"          ))))
+	gLo		= unlist(read.table(file =        file.path(Path, "Output",str_c("gLoSaveRW_", 	FileSuffix, ".txt"        ))))
+	gHi		= unlist(read.table(file =        file.path(Path, "Output",str_c("gHiSaveRW_", 	FileSuffix, ".txt"        ))))
+	ThetaVector	= unlist(read.table(file =  file.path(Path, "Output",str_c("ThetaVectorSaveRW_", 	FileSuffix, ".txt"))))
+	BetaVector	= unlist(read.table(file =  file.path(Path, "Output",str_c("BetaVectorSaveRW_", 	FileSuffix, ".txt"  ))))
+	BurnKPrev	= unlist(read.table(file =    file.path(Path, "Output",str_c("BurnKRW_", 			FileSuffix, ".txt"      ))))
 	TotalK	= sum(BurnKPrev)		## This does not work if previous session cutoff mid-session
 	} ## END: if(Continuation == 1) { 
 
