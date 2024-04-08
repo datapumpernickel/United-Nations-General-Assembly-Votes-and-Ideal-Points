@@ -24,13 +24,14 @@
 
 ## Code organization
 	require(compiler)
+require(here)
 	enableJIT(3)		## Just in time compiler: 0 turns this off; 1 compiles closures before an R script attempts to use them; 2 compiles closures before duplicating; 3 compiles all loops (for, while, repeat). Use 0 or 3.
 	ptm <- proc.time()	## Record processor time at beginning of session	
 
 ## Initialize parameters
 	Continuation	= 0		## 1 if use last values as starting values
 	RunDataOrganizer	= 1		## 1 if need to create data files from raw data
-	Path			= "~\\GitHub\\United-Nations-General-Assembly-Votes-and-Ideal-Points\\"   ## This indicates a subfolder where the organizing .R code (UN_DataProcessing.R), Rcpp functions and data reside
+	Path			= here::here('United-Nations-General-Assembly-Votes-and-Ideal-Points')   ## This indicates a subfolder where the organizing .R code (UN_DataProcessing.R), Rcpp functions and data reside
 	DataCode		= "Important"
 				## "All"			# For all non-missing data
 				## "NoNukes"  		# Cut nuclear related votes				
@@ -59,7 +60,7 @@
 ## Run organizer if needed to generate data files from raw data
 	if(RunDataOrganizer == 1 & Continuation == 0) {
 		print("Running data organizer . . . ")
-		source(paste(Path, "UN_DataProcessing.R", sep=""))	## The file name is encoded MANUALLY ##
+  source(file.path(Path, "UN_DataProcessing.R"))	## The file name is encoded MANUALLY ##
 	} ## END if(RunDataOrganizer == 1 & Continuation == 0) 
 
 ## Compile Rcpp functions: these functions are stored in RcppFunctions folder
@@ -266,29 +267,68 @@ BetaVector 	= rep(Beta, VoteN)
 		BetaStore[(kk-Burn)/Thin, ] 		= Beta
 		Gamma1Store[(kk-Burn)/Thin, ] 	= Gamma1
 		Gamma2Store[(kk-Burn)/Thin, ] 	= Gamma2
-		if (kk %% PrintSave ==0){ 		write(c(Burn, kk, TotalK), 	file = paste(Path, "Output\\BurnKRW_", 	FileSuffix, ".txt", sep=""), 		ncol=1)
-								write(Z, 				file = paste(Path, "Output\\ZSaveRW_", 	FileSuffix, ".txt", sep=""), 		ncol=1)
-								write(gLo, 				file = paste(Path, "Output\\gLoSaveRW_", 	FileSuffix, ".txt", sep=""), 		ncol=1)
-								write(gHi, 				file = paste(Path, "Output\\gHiSaveRW_", 	FileSuffix, ".txt", sep=""), 		ncol=1)
-								write(ThetaVector,		file = paste(Path, "Output\\ThetaVectorSaveRW_", 	FileSuffix, ".txt", sep=""), 	ncol=1)
-								write(Theta,			file = paste(Path, "Output\\ThetaSaveRW_", 		FileSuffix, ".txt", sep=""), 	ncol=1)
-								write(BetaVector, 		file = paste(Path, "Output\\BetaVectorSaveRW_", 	FileSuffix, ".txt", sep=""), 	ncol=1)
-								write(Gamma1, 			file = paste(Path, "Output\\Gamma1RW_", 		FileSuffix, ".txt", sep=""), 	ncol=1)
-								write(Gamma2, 			file = paste(Path, "Output\\Gamma2RW_", 		FileSuffix, ".txt", sep=""), 	ncol=1)
-			} ## END: 		if (kk %% PrintSave ==0){
+		if (kk %% PrintSave == 0) {			
+		    write(
+		      c(Burn, kk, TotalK),
+		      file = file.path(Path, "Output", str_c("BurnKRW_", 	FileSuffix, ".txt")),
+		      ncolumns = 1
+		    )
+		    write(Z,
+			  file = file.path(Path, "Output", str_c("ZSaveRW_", 	FileSuffix, ".txt")),
+			  ncolumns = 1)
+		    write(gLo,
+			  file = file.path(Path, "Output", str_c("gLoSaveRW_",	FileSuffix, ".txt")),
+			  ncolumns = 1)
+		    write(gHi,
+			  file = file.path(Path, "Output", str_c("gHiSaveRW_",	FileSuffix, ".txt")),
+			  ncolumns = 1)
+		    write(
+		      ThetaVector,
+		      file =  file.path(
+			Path,
+			"Output",
+			str_c("ThetaVectorSaveRW_",	FileSuffix, ".txt")
+		      ),
+		      ncolumns = 1
+		    )
+		    write(
+		      Theta,
+		      file = file.path(Path, "Output", str_c("ThetaSaveRW_",	FileSuffix, ".txt")),
+		      ncolumns = 1
+		    )
+		    write(
+		      BetaVector,
+		      file =  file.path(
+			Path,
+			"Output",
+			str_c("BetaVectorSaveRW_",	FileSuffix, ".txt")
+		      ),
+		      ncolumns = 1
+		    )
+		    write(
+		      Gamma1,
+		      file =  file.path(Path, "Output", str_c("Gamma1RW_", 		FileSuffix, ".txt")),
+		      ncolumns = 1
+		    )
+		    write(
+		      Gamma2,
+		      file =  file.path(Path, "Output", str_c("Gamma2RW_", 		FileSuffix, ".txt")),
+		      ncolumns = 1
+		    )
+		  } ## END: 		if (kk %% PrintSave ==0){
 	} 	## END: if(kk>Burn & ((kk-Burn) %% Thin == 0) { 
 } 	## END: while(kk< K){
 EndTime = date(); 
 
 ## Save for continuation purposes
-write(c(kk, Burn, K, TotalK), file = paste(Path, "Output\\BurnKRW_", 		FileSuffix, ".txt", sep=""), 	ncol=1)
-write(Z, 				file = paste(Path, "Output\\ZSaveRW_", 		FileSuffix, ".txt", sep=""), 	ncol=1)
-write(gLo, 				file = paste(Path, "Output\\gLoSaveRW_", 		FileSuffix, ".txt", sep=""), 	ncol=1)
-write(gHi, 				file = paste(Path, "Output\\gHiSaveRW_", 		FileSuffix, ".txt", sep=""), 	ncol=1)
-write(ThetaVector,		file = paste(Path, "Output\\ThetaVectorSaveRW_", 	FileSuffix, ".txt", sep=""), 	ncol=1)
-write(BetaVector, 		file = paste(Path, "Output\\BetaVectorSaveRW_", 	FileSuffix, ".txt", sep=""), 	ncol=1)
-write(Gamma1, 			file = paste(Path, "Output\\Gamma1RW_", 		FileSuffix, ".txt", sep=""), 	ncol=1)
-write(Gamma2, 			file = paste(Path, "Output\\Gamma2RW_", 		FileSuffix, ".txt", sep=""), 	ncol=1)
+write(c(kk, Burn, K, TotalK), file = file.path(Path, "Output", str_c("BurnKRW_", 		FileSuffix, ".txt")), 	ncolumns = 1)
+write(Z, 				file = file.path(Path, "Output", str_c("ZSaveRW_", 		FileSuffix, ".txt")), 	ncolumns = 1)
+write(gLo, 				file = file.path(Path, "Output", str_c("gLoSaveRW_", 		FileSuffix, ".txt")), 	ncolumns = 1)
+write(gHi, 				file = file.path(Path, "Output", str_c("gHiSaveRW_", 		FileSuffix, ".txt")), 	ncolumns = 1)
+write(ThetaVector,		file = file.path(Path, "Output", str_c("ThetaVectorSaveRW_", 	FileSuffix, ".txt")), 	ncolumns = 1)
+write(BetaVector, 		file = file.path(Path, "Output", str_c("BetaVectorSaveRW_", 	FileSuffix, ".txt")), 	ncolumns = 1)
+write(Gamma1, 			file = file.path(Path, "Output", str_c("Gamma1RW_", 		FileSuffix, ".txt")), 	ncolumns = 1)
+write(Gamma2, 			file = file.path(Path, "Output", str_c("Gamma2RW_", 		FileSuffix, ".txt")), 	ncolumns = 1)
 
 # Estimates
 ThetaEst 		= apply(ThetaStore, 	2, 	mean)
@@ -296,29 +336,29 @@ ThetaEstDist	= t(apply(ThetaStore, 2, quantile, probs = c(0, 0.05, 0.1, 0.5, 0.9
 BetaEst 		= apply(BetaStore, 	2, 	mean)
 
 ThetaSummary 	= cbind(CountryList, SessionList, IndN, ThetaEst, ThetaEstDist)
-write(t(ThetaSummary), 	file = paste(Path, "Output\\ThetaSummaryRW_", 	FileSuffix, ".txt", sep=""), ncol = length(ThetaSummary[1,]))
-write(t(BetaEst), 	file = paste(Path, "Output\\BetaEstRW_", 		FileSuffix, ".txt", sep=""), ncol = 1)
-write(t(BetaStore), 	file = paste(Path, "Output\\BetaStoreRW_", 		FileSuffix, ".txt", sep=""), ncol = length(BetaStore[1,]))
-write(t(ThetaStore), 	file = paste(Path, "Output\\ThetaStoreRW_",		FileSuffix, ".txt", sep=""), ncol = length(ThetaStore[1,]))
-write(t(Gamma1Store), 	file = paste(Path, "Output\\Gamma1StoreRW_", 	FileSuffix, ".txt", sep=""), ncol = length(Gamma1Store[1,]))
-write(t(Gamma2Store), 	file = paste(Path, "Output\\Gamma2StoreRW_", 	FileSuffix, ".txt", sep=""), ncol = length(Gamma2Store[1,]))
+write(t(ThetaSummary), 	file = file.path(Path, "Output", str_c("ThetaSummaryRW_", 	FileSuffix, ".txt")), ncolumns = length(ThetaSummary[1,]))
+write(t(BetaEst), 	file = file.path(Path, "Output", str_c("BetaEstRW_", 		FileSuffix, ".txt")), ncolumns = 1)
+write(t(BetaStore), 	file = file.path(Path, "Output", str_c("BetaStoreRW_", 		FileSuffix, ".txt")), ncolumns = length(BetaStore[1,]))
+write(t(ThetaStore), 	file = file.path(Path, "Output", str_c("ThetaStoreRW_",		FileSuffix, ".txt")), ncolumns = length(ThetaStore[1,]))
+write(t(Gamma1Store), 	file = file.path(Path, "Output", str_c("Gamma1StoreRW_", 	FileSuffix, ".txt")), ncolumns = length(Gamma1Store[1,]))
+write(t(Gamma2Store), 	file = file.path(Path, "Output", str_c("Gamma2StoreRW_", 	FileSuffix, ".txt")), ncolumns = length(Gamma2Store[1,]))
 
 
 
 ## Create output with vote information (rcid, gamma1est, gamma2est, beta, US vote, UK etc, resolution name, votes)
-BetaEst 	= read.table(file = paste(Path, "Output\\BetaEstRW_", 		FileSuffix, ".txt", sep=""))
-Gamma1Store = read.table(file = paste(Path, "Output\\Gamma1StoreRW_", 	FileSuffix, ".txt", sep=""))
-Gamma2Store = read.table(file = paste(Path, "Output\\Gamma2StoreRW_", 	FileSuffix, ".txt", sep=""))
-VoteTally 	= read.table(file = paste(Path, "Output\\VoteTally_", 		FileSuffix, ".txt", sep=""))
+BetaEst 	= read.table(file = file.path(Path, "Output", str_c("BetaEstRW_", 		FileSuffix, ".txt")))
+Gamma1Store = read.table(file = file.path(Path, "Output", str_c("Gamma1StoreRW_", 	FileSuffix, ".txt")))
+Gamma2Store = read.table(file = file.path(Path, "Output", str_c("Gamma2StoreRW_", 	FileSuffix, ".txt")))
+VoteTally 	= read.table(file = file.path(Path, "Output", str_c("VoteTally_", 		FileSuffix, ".txt")))
 VoteList 	= VoteTally[,1]
-VoteCode 	= read.table(file = paste(Path, "Output\\VoteCode_", 		FileSuffix, ".txt", sep=""))
-USplus 	= read.table(file = paste(Path, "Output\\USUKRussiaBrazilChinaIndiaIsrael_", 	FileSuffix, ".txt", sep=""))
+VoteCode 	= read.table(file = file.path(Path, "Output", str_c("VoteCode_", 		FileSuffix, ".txt")))
+#USplus 	= read.table(file = file.path(Path, "Output", str_c("USUKRussiaBrazilChinaIndiaIsrael_", 	FileSuffix, ".txt")))
 Gamma1Est 	= apply(Gamma1Store, 2,	mean)
 Gamma2Est 	= apply(Gamma2Store, 2,	mean)		## CHECK: cbind(Gamma2Est, rep(NA, TT), CountriesPerVote)
 
 VoteMatrix = cbind(1:length(t(BetaEst)), VoteTally, VoteCode, BetaEst, Gamma1Est, Gamma2Est, USplus)
 	names(VoteMatrix)[1:18] = c("tt", "rcidL", "Yes", "Abstain", "No", "Total", "MatchedDum", "VoteCode", "BetaEst", "Gamma1Est", "Gamma2Est", "US", "UK", "Russia", "Brazil", "China", "Israel", "India")
-write(t(VoteMatrix), 	file = paste(Path, "Output\\VoteMatrix_", FileSuffix, ".txt", sep=""), sep = "\t", ncol=length(VoteMatrix[1,]))
+write(t(VoteMatrix), 	file = file.path(Path, "Output", str_c("VoteMatrix_", FileSuffix, ".txt")), sep = "\t", ncolumns = length(VoteMatrix[1,]))
 ## Need to populate: Matches	= rep(NA, length(unique(VoteID)))
 
 
